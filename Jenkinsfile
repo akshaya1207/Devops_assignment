@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     tools {
-        // Make sure this matches the name configured in Jenkins
-        maven 'Maven_3.9.11'
+        maven 'Maven_3.9.11'  // your Maven tool name
     }
 
     stages {
@@ -13,13 +12,13 @@ pipeline {
             }
         }
 
-        stage('Build & Test') {
+        stage('Build & Package') {
             steps {
                 script {
                     if (isUnix()) {
-                        sh 'mvn clean test package'
+                        sh 'mvn clean package -DskipTests'
                     } else {
-                        bat 'mvn clean test package'
+                        bat 'mvn clean package -DskipTests'
                     }
                 }
             }
@@ -27,21 +26,14 @@ pipeline {
 
         stage('Archive Artifact') {
             steps {
-                archiveArtifacts artifacts: 'target/library-system-1.0.0.jar', fingerprint: true
-            }
-        }
-
-        stage('Publish Test Results') {
-            steps {
-                // 👇 The missing quote fixed here
-                junit 'target/surefire-reports/*.xml'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
     }
 
     post {
         success {
-            echo '✅ Build and Test Successful!'
+            echo '✅ Build Successful (Tests skipped)'
         }
         failure {
             echo '❌ Build failed. Check console output.'

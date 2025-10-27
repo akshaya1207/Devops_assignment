@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        // 👇 Make Jenkins use your configured Maven installation
+        maven 'Maven_3.9.11'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -11,7 +16,7 @@ pipeline {
         stage('Build & Test') {
             steps {
                 script {
-                    // Windows: use bat, Linux/macOS: use sh
+                    // Detect OS and run the correct Maven command
                     if (isUnix()) {
                         sh 'mvn clean test package'
                     } else {
@@ -23,23 +28,11 @@ pipeline {
 
         stage('Archive Artifact') {
             steps {
-                archiveArtifacts artifacts: 'target/LibraryBookStore-1.0-SNAPSHOT.jar', fingerprint: true
+                // ✅ Use your actual JAR name here
+                archiveArtifacts artifacts: 'target/library-system-1.0.0.jar', fingerprint: true
             }
         }
 
         stage('Publish Test Results') {
             steps {
-                junit 'target/surefire-reports/*.xml'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build and Test Successful!'
-        }
-        failure {
-            echo 'Build failed. Check console output.'
-        }
-    }
-}
+                junit 'target/surefire-reports/*.*
